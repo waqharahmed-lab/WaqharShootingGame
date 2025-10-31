@@ -18,9 +18,10 @@ public class PlayerController : MonoBehaviour
         
         float forwardInput = Input.GetAxis("Vertical");
         playerRb.AddForce(Vector3.forward * speed * forwardInput);
-    }
+    
     if (Input.GetKeyDown(KeyCode.Space))
 {
     Instantiate(projectilePrefab, transform.position, projectilePrefab.transform.rotation);
+}
 }
 }
