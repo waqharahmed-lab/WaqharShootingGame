@@ -17,13 +17,15 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        
+
         float forwardInput = Input.GetAxis("Vertical");
         playerRb.AddForce(focalPoint.transform.forward * speed * forwardInput);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Instantiate(projectilePrefab, transform.position, projectilePrefab.transform.rotation);
+        }
+    }
     
-    if (Input.GetKeyDown(KeyCode.Space))
-{
-    Instantiate(projectilePrefab, transform.position, projectilePrefab.transform.rotation);
-}
-}
+
 }
