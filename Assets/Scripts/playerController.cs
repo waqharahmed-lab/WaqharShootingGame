@@ -17,15 +17,24 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
         float forwardInput = Input.GetAxis("Vertical");
-        playerRb.AddForce(focalPoint.transform.forward * speed * forwardInput);
+        float horizontalInput = Input.GetAxis("Horizontal");
+
+        Vector3 moveDirection = (focalPoint.transform.forward * forwardInput + focalPoint.transform.right * horizontalInput).normalized;
+        playerRb.AddForce(moveDirection * speed);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Instantiate(projectilePrefab, transform.position, projectilePrefab.transform.rotation);
         }
     }
-    
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Zombie1"))
+        {
+            Debug.Log("Game Over! Zombie touched the player!");
+            Time.timeScale = 0f;
+        }
+    }
 }
