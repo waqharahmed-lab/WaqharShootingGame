@@ -27,15 +27,18 @@ public class zombieMove : MonoBehaviour
 
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
-     void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         // If zombie gets hit by bullet
         if (collision.gameObject.CompareTag("Bullet"))
         {
+               FindObjectOfType<GameManager>().AddScore(1);
+
             Destroy(gameObject);
             Destroy(collision.gameObject);
-         // also destroy bullet
+            // also destroy bullet
         }
     }
+    
     
 }
