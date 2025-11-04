@@ -28,13 +28,13 @@ public class PlayerController : MonoBehaviour
             Instantiate(projectilePrefab, transform.position, projectilePrefab.transform.rotation);
         }
     }
-
-    private void OnCollisionEnter(Collision collision)
+void OnCollisionEnter(Collision collision)
+{
+    if (collision.gameObject.CompareTag("Zombie1"))
     {
-        if (collision.gameObject.CompareTag("Zombie1"))
-        {
-            Debug.Log("Game Over! Zombie touched the player!");
-            Time.timeScale = 0f;
-        }
+    
+        FindObjectOfType<GameManager>().GameOver();
+    }
+
     }
 }

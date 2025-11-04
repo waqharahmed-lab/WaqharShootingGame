@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Bullet
   - Zombie1
+  - Ground
   layers:
   - Default
   - TransparentFX
