@@ -9,6 +9,7 @@ public class zombieMove : MonoBehaviour
 
     public float speed = 3f;
     public float rotationSpeed = 5f;
+    public GameObject deathEffect;
 
     void Start()
     {
@@ -18,9 +19,13 @@ public class zombieMove : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
-
-        // ✅ Step 1: Rotate smoothly to face the player
+       if (player == null) return;
+    float adjustedSpeed = speed;
+    if (DifficultyManager.Instance != null)
+    {
+        adjustedSpeed *= DifficultyManager.Instance.zombieSpeedMultiplier;
+    }
+     
         Vector3 direction = (player.transform.position - transform.position).normalized * speed; 
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
@@ -29,14 +34,18 @@ public class zombieMove : MonoBehaviour
     }
     void OnCollisionEnter(Collision collision)
     {
-        // If zombie gets hit by bullet
+       
         if (collision.gameObject.CompareTag("Bullet"))
         {
-               FindObjectOfType<GameManager>().AddScore(1);
+            FindObjectOfType<GameManager>().AddScore(1);
+                if (deathEffect != null)
+            {
+                Instantiate(deathEffect, transform.position, Quaternion.identity);
+            }
 
             Destroy(gameObject);
             Destroy(collision.gameObject);
-            // also destroy bullet
+        
         }
     }
     
