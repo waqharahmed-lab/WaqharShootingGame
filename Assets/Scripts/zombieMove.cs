@@ -6,10 +6,10 @@ public class zombieMove : MonoBehaviour
 {
     private GameObject player;
     private Rigidbody enemyRb;
+    public GameObject deathEffect;
 
     public float speed = 3f;
     public float rotationSpeed = 5f;
-    public GameObject deathEffect;
 
     void Start()
     {
@@ -19,12 +19,8 @@ public class zombieMove : MonoBehaviour
 
     void Update()
     {
-       if (player == null) return;
-    float adjustedSpeed = speed;
-    if (DifficultyManager.Instance != null)
-    {
-        adjustedSpeed *= DifficultyManager.Instance.zombieSpeedMultiplier;
-    }
+        if (player == null) return;
+
      
         Vector3 direction = (player.transform.position - transform.position).normalized * speed; 
         Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -32,7 +28,7 @@ public class zombieMove : MonoBehaviour
 
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
-    void OnCollisionEnter(Collision collision)
+      void OnCollisionEnter(Collision collision)
     {
        
         if (collision.gameObject.CompareTag("Bullet"))
@@ -49,5 +45,8 @@ public class zombieMove : MonoBehaviour
         }
     }
     
+    
+    
+
     
 }

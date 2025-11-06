@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
         score += points;
         UpdateScoreText();
 
-        // ✅ Check for new high score
+        //  Check for new high score
         if (score > highScore)
         {
             highScore = score;
