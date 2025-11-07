@@ -1,36 +1,52 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using TMPro;
+using UnityEngine.EventSystems;  // ✅ Add this
 
 public class PauseManager : MonoBehaviour
 {
     public Button pauseButton;
     private bool isPaused = false;
+    private TextMeshProUGUI buttonText;
 
     void Start()
     {
-        if (pauseButton != null)
-            pauseButton.onClick.AddListener(TogglePause);
-        else
-            Debug.LogError("Pause Button not assigned in Inspector!");
+        if (pauseButton == null)
+        {
+            Debug.LogError("Pause Button not assigned!");
+            return;
+        }
+
+        // ✅ Find the TMP text component once
+        buttonText = pauseButton.GetComponentInChildren<TextMeshProUGUI>();
+        if (buttonText == null)
+            Debug.LogError("No TextMeshProUGUI found inside the Pause Button!");
+
+        // ✅ Add click listener
+        pauseButton.onClick.AddListener(TogglePause);
     }
 
-    public void TogglePause() // ✅ must be public, no parameters
+    void TogglePause()
     {
+        // ✅ Deselect any UI object so spacebar won’t re-trigger it
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
+
+        if (buttonText == null)
+        {
+            Debug.LogError("Pause button text not found!");
+            return;
+        }
 
         if (isPaused)
         {
             Time.timeScale = 1f;
             isPaused = false;
-            pauseButton.GetComponentInChildren<Text>().text = "Pause";
         }
         else
         {
             Time.timeScale = 0f;
             isPaused = true;
-            pauseButton.GetComponentInChildren<Text>().text = "Play";
         }
     }
 }
