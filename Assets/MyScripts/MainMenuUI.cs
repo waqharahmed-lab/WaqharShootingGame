@@ -1,11 +1,28 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;  // ✅ Needed for TextMeshProUGUI
 
 public class MainMenuUI : MonoBehaviour
 {
-    // ✅ Function called when Play button is clicked
+    public TextMeshProUGUI coinText;  
+
+    void Start()
+    {
+        UpdateCoinDisplay();  
+    }
+
     public void OnPlayButton()
     {
-        SceneManager.LoadScene(1);  // make sure name matches your scene file
+        SceneManager.LoadScene(1);  
+    }
+
+
+    private void UpdateCoinDisplay()
+    {
+        int totalCoins = PlayerPrefs.GetInt("TotalCoins", 0); 
+        if (coinText != null)
+        {
+            coinText.text = totalCoins.ToString();  
+        }
     }
 }

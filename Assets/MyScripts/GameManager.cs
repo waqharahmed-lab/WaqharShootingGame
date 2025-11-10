@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     private int score = 0;
     private int highScore = 0;
     private bool isGameOver = false;
+     public int coinValue = 1;     
+    private int totalCoins = 0;
 
     void Start()
     {
@@ -25,6 +27,7 @@ public class GameManager : MonoBehaviour
 
         // ✅ Load saved high score
         highScore = PlayerPrefs.GetInt("HighScore", 0);
+        totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
 
         // ✅ Reset score display
         score = 0;
@@ -43,6 +46,7 @@ public class GameManager : MonoBehaviour
                 gameOverPanel.SetActive(true);
 
             Time.timeScale = 0f;
+             UpdateTotalCoins();
 
             if (finalScoreText != null)
                 finalScoreText.text = "Final Score: " + score;
@@ -72,6 +76,14 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
             UpdateHighScoreText();
         }
+    }
+    private void UpdateTotalCoins()
+    {
+        int earnedCoins = score * coinValue; 
+        totalCoins += earnedCoins;
+        PlayerPrefs.SetInt("TotalCoins", totalCoins);
+        PlayerPrefs.Save();
+        Debug.Log("Earned " + earnedCoins + " coins! Total now: " + totalCoins);
     }
 
     private void UpdateScoreText()
