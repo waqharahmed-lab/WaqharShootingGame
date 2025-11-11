@@ -24,10 +24,10 @@ public class GameManager : MonoBehaviour
     private const int maxLives = 3;
     private const int refillTimeMinutes = 1;
 
-    // 🪙 Auto coin reward system (per minute)
+
     public int coinsPerMinute = 10;         // how many coins to give per real minute
     public TextMeshProUGUI coinText;        // optional: assign in Inspector to show total coins
-    // ========================================
+
 
     void Start()
     {
@@ -152,6 +152,8 @@ public class GameManager : MonoBehaviour
         string lastLogin = PlayerPrefs.GetString("LastLoginTime", "");
         DateTime now = DateTime.Now;
 
+        int coinsEarned = 0;
+
         if (!string.IsNullOrEmpty(lastLogin))
         {
             DateTime lastLoginTime = DateTime.Parse(lastLogin);
@@ -161,21 +163,20 @@ public class GameManager : MonoBehaviour
 
             if (minutesPassed >= 1)
             {
-                int coinsToAdd = minutesPassed * coinsPerMinute;
-                totalCoins += coinsToAdd;
-
-                Debug.Log($"⏱ {minutesPassed} minute(s) passed — added {coinsToAdd} coins!");
+                coinsEarned = minutesPassed * coinsPerMinute;
+                totalCoins += coinsEarned;
 
                 PlayerPrefs.SetInt("TotalCoins", totalCoins);
+                PlayerPrefs.SetInt("LastEarnedCoins", coinsEarned); // ✅ Save how many coins were earned
                 PlayerPrefs.Save();
             }
         }
 
-        // Update last login time
+        // ✅ Update last login time
         PlayerPrefs.SetString("LastLoginTime", now.ToString());
         PlayerPrefs.Save();
 
-        // Update UI if assigned
+        // ✅ Update UI if assigned
         if (coinText != null)
             coinText.text = "Coins: " + totalCoins;
     }

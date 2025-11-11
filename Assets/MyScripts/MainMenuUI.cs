@@ -15,21 +15,28 @@ public class MainMenuUI : MonoBehaviour
 
     public int entryFee = 10;
     private const int maxLives = 3;
-    private const int refillTimeMinutes = 1;
+    private const int refillTimeMinutes = 30;
 
     private int totalCoins;
     private int lives;
     private System.DateTime nextLifeTime;
 
     void Start()
-    {
-        LoadLives();
-        UpdateHeartsUI();
-        UpdateCoinDisplay();
-        CheckDailyRewardButton();
-    }
+{
+    LoadLives();
+    UpdateHeartsUI();
+    UpdateCoinDisplay();
 
-   
+    
+    int lastEarned = PlayerPrefs.GetInt("LastEarnedCoins", 0);
+    if (lastEarned > 0 && messageText != null)
+    {
+        messageText.text = $"+{lastEarned} coins earned while you were away!";
+        PlayerPrefs.SetInt("LastEarnedCoins", 0); 
+        PlayerPrefs.Save();
+    }
+}
+
     public void OnPlayButton()
     {
         totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
