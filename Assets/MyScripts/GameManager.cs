@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,6 +23,11 @@ public class GameManager : MonoBehaviour
     private System.DateTime nextLifeTime;
     private const int maxLives = 3;
     private const int refillTimeMinutes = 1;
+
+    // 🪙 Auto coin reward system (per minute)
+    public int coinsPerMinute = 10;         // how many coins to give per real minute
+    public TextMeshProUGUI coinText;        // optional: assign in Inspector to show total coins
+    // ========================================
 
     void Start()
     {
@@ -51,6 +57,9 @@ public class GameManager : MonoBehaviour
         score = 0;
         UpdateScoreText();
         UpdateHighScoreText();
+
+        // 🪙 Auto coin generation (real time per minute)
+        GiveTimedCoins();
     }
 
     public void GameOver()
@@ -88,7 +97,7 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetString("NextLifeTime", nextLifeTime.ToString());
             PlayerPrefs.Save();
 
-            Debug.Log("❌ No lives left! Returning to Lobby.");
+            Debug.Log("No lives left! Returning to Lobby.");
             SceneManager.LoadScene(0);
             return;
         }
@@ -120,6 +129,9 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("TotalCoins", totalCoins);
         PlayerPrefs.Save();
         Debug.Log("Earned " + earnedCoins + " coins! Total now: " + totalCoins);
+
+        if (coinText != null)
+            coinText.text = "Coins: " + totalCoins;
     }
 
     private void UpdateScoreText()
@@ -132,5 +144,39 @@ public class GameManager : MonoBehaviour
     {
         if (highScoreText != null)
             highScoreText.text = "High: " + highScore;
+    }
+
+    // 🪙 Real-time coin system (per minute)
+    private void GiveTimedCoins()
+    {
+        string lastLogin = PlayerPrefs.GetString("LastLoginTime", "");
+        DateTime now = DateTime.Now;
+
+        if (!string.IsNullOrEmpty(lastLogin))
+        {
+            DateTime lastLoginTime = DateTime.Parse(lastLogin);
+            TimeSpan timePassed = now - lastLoginTime;
+
+            int minutesPassed = Mathf.FloorToInt((float)timePassed.TotalMinutes);
+
+            if (minutesPassed >= 1)
+            {
+                int coinsToAdd = minutesPassed * coinsPerMinute;
+                totalCoins += coinsToAdd;
+
+                Debug.Log($"⏱ {minutesPassed} minute(s) passed — added {coinsToAdd} coins!");
+
+                PlayerPrefs.SetInt("TotalCoins", totalCoins);
+                PlayerPrefs.Save();
+            }
+        }
+
+        // Update last login time
+        PlayerPrefs.SetString("LastLoginTime", now.ToString());
+        PlayerPrefs.Save();
+
+        // Update UI if assigned
+        if (coinText != null)
+            coinText.text = "Coins: " + totalCoins;
     }
 }

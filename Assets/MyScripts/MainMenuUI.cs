@@ -4,13 +4,15 @@ using TMPro;
 
 public class MainMenuUI : MonoBehaviour
 {
-    [Header("UI References")]
     public TextMeshProUGUI coinText;
     public TextMeshProUGUI messageText;
     public UnityEngine.UI.Image[] hearts;
     public TextMeshProUGUI timerText;
 
-    [Header("Game Settings")]
+  
+    public UnityEngine.UI.Button rewardButton; 
+    public int dailyRewardCoins = 200;        
+
     public int entryFee = 10;
     private const int maxLives = 3;
     private const int refillTimeMinutes = 1;
@@ -24,9 +26,10 @@ public class MainMenuUI : MonoBehaviour
         LoadLives();
         UpdateHeartsUI();
         UpdateCoinDisplay();
+        CheckDailyRewardButton();
     }
 
-    // ✅ PLAY BUTTON LOGIC (No life deduction here)
+   
     public void OnPlayButton()
     {
         totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -141,5 +144,60 @@ public class MainMenuUI : MonoBehaviour
     {
         if (lives < maxLives)
             UpdateHeartsUI();
+    }
+
+
+    public void OnDailyRewardButton()
+    {
+        string lastClaimDate = PlayerPrefs.GetString("LastRewardDate", "");
+        string todayDate = System.DateTime.Now.ToString("yyyy-MM-dd");
+
+        if (lastClaimDate != todayDate)
+        {
+            // First claim today
+            totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
+            totalCoins += dailyRewardCoins;
+
+            PlayerPrefs.SetInt("TotalCoins", totalCoins);
+            PlayerPrefs.SetString("LastRewardDate", todayDate);
+            PlayerPrefs.Save();
+
+            UpdateCoinDisplay();
+
+            Debug.Log($"Daily reward claimed! +{dailyRewardCoins} coins");
+
+            if (messageText != null)
+                messageText.text = $"You received {dailyRewardCoins} coins!";
+            if (rewardButton != null)
+                rewardButton.interactable = false;
+        }
+        else
+        {
+            if (messageText != null)
+                messageText.text = "Already claimed today's reward.";
+            if (rewardButton != null)
+                rewardButton.interactable = false;
+        }
+    }
+
+    private void CheckDailyRewardButton()
+    {
+        string lastClaimDate = PlayerPrefs.GetString("LastRewardDate", "");
+        string todayDate = System.DateTime.Now.ToString("yyyy-MM-dd");
+
+        if (lastClaimDate == todayDate)
+        {
+            if (rewardButton != null)
+                rewardButton.interactable = false;
+            if (messageText != null)
+                messageText.text = "Daily reward already claimed.";
+        }
+        else
+        {
+            if (rewardButton != null)
+                rewardButton.interactable = true;
+            if (messageText != null)
+                messageText.text = "Tap to claim your daily reward!";
+        }
     }
 }
