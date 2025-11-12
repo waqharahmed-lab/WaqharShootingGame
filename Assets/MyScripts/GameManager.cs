@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
     private const int refillTimeMinutes = 1;
 
 
-    public int coinsPerMinute = 10;         // how many coins to give per real minute
+    public int coinsPerMinute = 1;         // how many coins to give per real minute
     public TextMeshProUGUI coinText;        // optional: assign in Inspector to show total coins
 
 
@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour
 
             int minutesPassed = Mathf.FloorToInt((float)timePassed.TotalMinutes);
 
-            if (minutesPassed >= 1)
+            if (minutesPassed >= 5)
             {
                 coinsEarned = minutesPassed * coinsPerMinute;
                 totalCoins += coinsEarned;

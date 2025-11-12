@@ -13,9 +13,8 @@ public class MainMenuUI : MonoBehaviour
     public UnityEngine.UI.Button rewardButton; 
     public int dailyRewardCoins = 200;        
 
-    public int entryFee = 10;
+    public int entryFee = 200;
     private const int maxLives = 3;
-    private const int refillTimeMinutes = 30;
 
     private int totalCoins;
     private int lives;
@@ -27,8 +26,7 @@ public class MainMenuUI : MonoBehaviour
     UpdateHeartsUI();
     UpdateCoinDisplay();
 
-    
-    int lastEarned = PlayerPrefs.GetInt("LastEarnedCoins", 0);
+        int lastEarned = PlayerPrefs.GetInt("LastEarnedCoins", 0);
     if (lastEarned > 0 && messageText != null)
     {
         messageText.text = $"+{lastEarned} coins earned while you were away!";
@@ -39,6 +37,8 @@ public class MainMenuUI : MonoBehaviour
 
     public void OnPlayButton()
     {
+           Debug.Log("Entry Fee in OnPlayButton: " + entryFee);
+
         totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
         lives = PlayerPrefs.GetInt("Lives", maxLives);
 
