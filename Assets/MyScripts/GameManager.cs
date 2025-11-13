@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        
         // Load lives and nextLifeTime
         lives = PlayerPrefs.GetInt("Lives", maxLives);
         string nextLifeString = PlayerPrefs.GetString("NextLifeTime", "");
@@ -60,6 +61,7 @@ public class GameManager : MonoBehaviour
 
         // 🪙 Auto coin generation (real time per minute)
         GiveTimedCoins();
+        
     }
 
     public void GameOver()
@@ -82,6 +84,7 @@ public class GameManager : MonoBehaviour
                 finalHighScoreText.text = "High Score: " + highScore;
         }
     }
+    
 
     public void RestartGame()
     {
@@ -180,4 +183,13 @@ public class GameManager : MonoBehaviour
         if (coinText != null)
             coinText.text = "Coins: " + totalCoins;
     }
+    public void AddCoins(int amount)
+{
+    totalCoins += amount;
+    PlayerPrefs.SetInt("TotalCoins", totalCoins);
+    PlayerPrefs.Save();
+    if (coinText != null)
+        coinText.text = "Coins: " + totalCoins;
+}
+
 }

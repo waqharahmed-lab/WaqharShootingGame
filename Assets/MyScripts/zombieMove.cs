@@ -34,6 +34,7 @@ public class zombieMove : MonoBehaviour
         if (collision.gameObject.CompareTag("Bullet"))
         {
             FindObjectOfType<GameManager>().AddScore(1);
+              FindObjectOfType<KillBonusManager>().EnemyKilled();
                 if (deathEffect != null)
             {
                 Instantiate(deathEffect, transform.position, Quaternion.identity);
@@ -44,9 +45,5 @@ public class zombieMove : MonoBehaviour
         
         }
     }
-    
-    
-    
-
     
 }
