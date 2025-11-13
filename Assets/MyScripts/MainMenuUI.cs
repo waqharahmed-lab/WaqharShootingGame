@@ -4,48 +4,59 @@ using TMPro;
 
 public class MainMenuUI : MonoBehaviour
 {
+    [Header("UI References")]
     public TextMeshProUGUI coinText;
     public TextMeshProUGUI messageText;
     public UnityEngine.UI.Image[] hearts;
-    public TextMeshProUGUI timerText;
+    public TextMeshProUGUI timerText; // Life refill timer
+    public TextMeshProUGUI dailyRewardTimerText; // Daily reward cooldown timer
+    public TextMeshProUGUI hourlyRewardTimerText; // ✅ New: Hourly reward timer
 
-  
-    public UnityEngine.UI.Button rewardButton; 
-    public int dailyRewardCoins = 200;        
+    [Header("Buttons & Rewards")]
+    public UnityEngine.UI.Button rewardButton; // Daily reward
+    public UnityEngine.UI.Button hourlyRewardButton; // ✅ New: Hourly reward button
+    public int dailyRewardCoins = 200;
+    public float dailyRewardCooldownHours = 24f;
+    public int hourlyRewardCoins = 100; // ✅ New: +100 coins per hour
+    public float hourlyRewardCooldownHours = 1f; // ✅ 1-hour cooldown
 
+    [Header("Game Settings")]
     public int entryFee = 200;
     private const int maxLives = 3;
 
     private int totalCoins;
     private int lives;
     private System.DateTime nextLifeTime;
+    private System.DateTime nextRewardTime;
+    private System.DateTime nextHourlyRewardTime; // ✅ New
 
     void Start()
-{
-    LoadLives();
-    UpdateHeartsUI();
-    UpdateCoinDisplay();
-
-        int lastEarned = PlayerPrefs.GetInt("LastEarnedCoins", 0);
-    if (lastEarned > 0 && messageText != null)
     {
-        messageText.text = $"+{lastEarned} coins earned while you were away!";
-        PlayerPrefs.SetInt("LastEarnedCoins", 0); 
-        PlayerPrefs.Save();
+        LoadLives();
+        UpdateHeartsUI();
+        UpdateCoinDisplay();
+        LoadDailyRewardTimer();
+        LoadHourlyRewardTimer(); // ✅ New
     }
-}
 
+    void Update()
+    {
+        if (lives < maxLives)
+            UpdateHeartsUI();
+
+        UpdateDailyRewardTimerUI();
+        UpdateHourlyRewardTimerUI(); // ✅ Keep updating hourly timer
+    }
+
+    // ✅ PLAY BUTTON
     public void OnPlayButton()
     {
-           Debug.Log("Entry Fee in OnPlayButton: " + entryFee);
-
         totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
         lives = PlayerPrefs.GetInt("Lives", maxLives);
 
         if (lives <= 0)
         {
-            if (messageText != null)
-                messageText.text = "No lives left! Wait for refill.";
+            messageText.text = "No lives left! Wait for refill.";
             return;
         }
 
@@ -54,18 +65,16 @@ public class MainMenuUI : MonoBehaviour
             totalCoins -= entryFee;
             PlayerPrefs.SetInt("TotalCoins", totalCoins);
             PlayerPrefs.Save();
-
             UpdateCoinDisplay();
-            SceneManager.LoadScene(1); // Start game
+            SceneManager.LoadScene(1);
         }
         else
         {
-            if (messageText != null)
-                messageText.text = "Not enough coins!";
+            messageText.text = "Not enough coins!";
         }
     }
 
-    // ✅ Coin display
+    // ✅ Coin Display
     private void UpdateCoinDisplay()
     {
         int totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -73,7 +82,7 @@ public class MainMenuUI : MonoBehaviour
             coinText.text = totalCoins.ToString();
     }
 
-    // ✅ Cheat to add coins
+    // ✅ Cheat Button
     public void OnCheatAddCoins()
     {
         int totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -81,14 +90,11 @@ public class MainMenuUI : MonoBehaviour
         PlayerPrefs.SetInt("TotalCoins", totalCoins);
         PlayerPrefs.Save();
 
-        Debug.Log("Cheat used! Coins increased to: " + totalCoins);
         UpdateCoinDisplay();
-
-        if (messageText != null)
-            messageText.text = "+100 coins added!";
+        messageText.text = "+100 coins added!";
     }
 
-    // ✅ Load & Save lives
+    // ✅ Load & Save Lives
     private void LoadLives()
     {
         lives = PlayerPrefs.GetInt("Lives", maxLives);
@@ -111,17 +117,12 @@ public class MainMenuUI : MonoBehaviour
         if (hearts == null || hearts.Length == 0)
             return;
 
-        // Show hearts based on remaining lives
         for (int i = 0; i < hearts.Length; i++)
-        {
-            if (hearts[i] != null)
-                hearts[i].enabled = i < lives;
-        }
+            hearts[i].enabled = i < lives;
 
         if (timerText == null)
             return;
 
-        // Show timer only when lives are zero
         if (lives <= 0)
         {
             System.TimeSpan timeLeft = nextLifeTime - System.DateTime.Now;
@@ -133,7 +134,6 @@ public class MainMenuUI : MonoBehaviour
             }
             else
             {
-                // Refill all lives after timer ends
                 lives = maxLives;
                 PlayerPrefs.SetInt("Lives", lives);
                 PlayerPrefs.SetString("NextLifeTime", "");
@@ -147,64 +147,136 @@ public class MainMenuUI : MonoBehaviour
         }
     }
 
-    void Update()
+    // ✅ DAILY REWARD SYSTEM
+    private void LoadDailyRewardTimer()
     {
-        if (lives < maxLives)
-            UpdateHeartsUI();
+        string nextRewardString = PlayerPrefs.GetString("NextRewardTime", "");
+        if (!string.IsNullOrEmpty(nextRewardString))
+            nextRewardTime = System.DateTime.Parse(nextRewardString);
+        else
+            nextRewardTime = System.DateTime.Now;
+
+        UpdateDailyRewardButtonState();
     }
 
+    private void UpdateDailyRewardButtonState()
+    {
+        if (System.DateTime.Now >= nextRewardTime)
+        {
+            rewardButton.interactable = true;
+            if (dailyRewardTimerText != null)
+                dailyRewardTimerText.text = "Reward ready!";
+        }
+        else
+        {
+            rewardButton.interactable = false;
+        }
+    }
+
+    private void UpdateDailyRewardTimerUI()
+    {
+        if (dailyRewardTimerText == null)
+            return;
+
+        if (System.DateTime.Now < nextRewardTime)
+        {
+            System.TimeSpan remaining = nextRewardTime - System.DateTime.Now;
+            dailyRewardTimerText.text = "Next reward in: " +
+                remaining.Hours.ToString("00") + ":" +
+                remaining.Minutes.ToString("00") + ":" +
+                remaining.Seconds.ToString("00");
+        }
+        else
+        {
+            dailyRewardTimerText.text = "Reward ready!";
+            rewardButton.interactable = true;
+        }
+    }
 
     public void OnDailyRewardButton()
     {
-        string lastClaimDate = PlayerPrefs.GetString("LastRewardDate", "");
-        string todayDate = System.DateTime.Now.ToString("yyyy-MM-dd");
-
-        if (lastClaimDate != todayDate)
+        if (System.DateTime.Now < nextRewardTime)
         {
-            // First claim today
-            totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
-            totalCoins += dailyRewardCoins;
+            messageText.text = "Please wait for the timer.";
+            return;
+        }
 
-            PlayerPrefs.SetInt("TotalCoins", totalCoins);
-            PlayerPrefs.SetString("LastRewardDate", todayDate);
-            PlayerPrefs.Save();
+        totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
+        totalCoins += dailyRewardCoins;
 
-            UpdateCoinDisplay();
+        PlayerPrefs.SetInt("TotalCoins", totalCoins);
+        nextRewardTime = System.DateTime.Now.AddHours(dailyRewardCooldownHours);
+        PlayerPrefs.SetString("NextRewardTime", nextRewardTime.ToString());
+        PlayerPrefs.Save();
 
-            Debug.Log($"Daily reward claimed! +{dailyRewardCoins} coins");
+        UpdateCoinDisplay();
+        messageText.text = $"You received {dailyRewardCoins} coins!";
+        rewardButton.interactable = false;
+    }
 
-            if (messageText != null)
-                messageText.text = $"You received {dailyRewardCoins} coins!";
-            if (rewardButton != null)
-                rewardButton.interactable = false;
+    // ✅ HOURLY REWARD SYSTEM
+    private void LoadHourlyRewardTimer()
+    {
+        string nextHourlyRewardString = PlayerPrefs.GetString("NextHourlyRewardTime", "");
+        if (!string.IsNullOrEmpty(nextHourlyRewardString))
+            nextHourlyRewardTime = System.DateTime.Parse(nextHourlyRewardString);
+        else
+            nextHourlyRewardTime = System.DateTime.Now;
+
+        UpdateHourlyRewardButtonState();
+    }
+
+    private void UpdateHourlyRewardButtonState()
+    {
+        if (System.DateTime.Now >= nextHourlyRewardTime)
+        {
+            hourlyRewardButton.interactable = true;
+            if (hourlyRewardTimerText != null)
+                hourlyRewardTimerText.text = "Hourly reward ready!";
         }
         else
         {
-            if (messageText != null)
-                messageText.text = "Already claimed today's reward.";
-            if (rewardButton != null)
-                rewardButton.interactable = false;
+            hourlyRewardButton.interactable = false;
         }
     }
 
-    private void CheckDailyRewardButton()
+    private void UpdateHourlyRewardTimerUI()
     {
-        string lastClaimDate = PlayerPrefs.GetString("LastRewardDate", "");
-        string todayDate = System.DateTime.Now.ToString("yyyy-MM-dd");
+        if (hourlyRewardTimerText == null)
+            return;
 
-        if (lastClaimDate == todayDate)
+        if (System.DateTime.Now < nextHourlyRewardTime)
         {
-            if (rewardButton != null)
-                rewardButton.interactable = false;
-            if (messageText != null)
-                messageText.text = "Daily reward already claimed.";
+            System.TimeSpan remaining = nextHourlyRewardTime - System.DateTime.Now;
+            hourlyRewardTimerText.text = "Next hourly reward in: " +
+                remaining.Minutes.ToString("00") + ":" +
+                remaining.Seconds.ToString("00");
         }
         else
         {
-            if (rewardButton != null)
-                rewardButton.interactable = true;
-            if (messageText != null)
-                messageText.text = "Tap to claim your daily reward!";
+            hourlyRewardTimerText.text = "Hourly reward ready!";
+            hourlyRewardButton.interactable = true;
         }
+    }
+
+    public void OnHourlyRewardButton()
+    {
+        if (System.DateTime.Now < nextHourlyRewardTime)
+        {
+            messageText.text = "Please wait for the hourly timer.";
+            return;
+        }
+
+        totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
+        totalCoins += hourlyRewardCoins;
+
+        PlayerPrefs.SetInt("TotalCoins", totalCoins);
+        nextHourlyRewardTime = System.DateTime.Now.AddHours(hourlyRewardCooldownHours);
+        PlayerPrefs.SetString("NextHourlyRewardTime", nextHourlyRewardTime.ToString());
+        PlayerPrefs.Save();
+
+        UpdateCoinDisplay();
+        messageText.text = $"You received {hourlyRewardCoins} coins!";
+        hourlyRewardButton.interactable = false;
     }
 }
