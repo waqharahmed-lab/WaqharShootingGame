@@ -28,22 +28,24 @@ public class zombieMove : MonoBehaviour
 
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
-      void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
-       
+
         if (collision.gameObject.CompareTag("Bullet"))
         {
             FindObjectOfType<GameManager>().AddScore(1);
-              FindObjectOfType<KillBonusManager>().EnemyKilled();
-                if (deathEffect != null)
+            FindObjectOfType<KillBonusManager>().EnemyKilled();
+            if (deathEffect != null)
             {
                 Instantiate(deathEffect, transform.position, Quaternion.identity);
             }
 
             Destroy(gameObject);
             Destroy(collision.gameObject);
-        
+
         }
+
     }
+    
     
 }

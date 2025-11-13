@@ -94,13 +94,25 @@ public class MainMenuUI : MonoBehaviour
     }
 
     // ---------------- LIVES ----------------
-    private void LoadLives()
+   private void LoadLives()
+{
+    lives = PlayerPrefs.GetInt("Lives", maxLives);
+    string nextLifeString = PlayerPrefs.GetString("NextLifeTime", "");
+
+    if (!string.IsNullOrEmpty(nextLifeString))
     {
-        lives = PlayerPrefs.GetInt("Lives", maxLives);
-        string nextLifeString = PlayerPrefs.GetString("NextLifeTime", "");
-        if (!string.IsNullOrEmpty(nextLifeString))
-            nextLifeTime = System.DateTime.Parse(nextLifeString);
+        nextLifeTime = System.DateTime.Parse(nextLifeString);
+
+        // ✅ Check if timer has passed
+        if (System.DateTime.Now >= nextLifeTime)
+        {
+            lives = maxLives; // refill lives
+            PlayerPrefs.SetInt("Lives", lives);
+            PlayerPrefs.SetString("NextLifeTime", "");
+            PlayerPrefs.Save();
+        }
     }
+}
 
     private void SaveLives()
     {
@@ -110,40 +122,45 @@ public class MainMenuUI : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    private void UpdateHeartsUI()
+   private void UpdateHeartsUI()
+{
+    if (hearts == null || hearts.Length == 0)
+        return;
+
+    for (int i = 0; i < hearts.Length; i++)
+        hearts[i].enabled = i < lives; // show hearts according to lives
+
+    if (timerText == null)
+        return;
+
+    if (lives <= 0)
     {
-        if (hearts == null || hearts.Length == 0)
-            return;
-
-        for (int i = 0; i < hearts.Length; i++)
-            hearts[i].enabled = i < lives;
-
-        if (timerText == null)
-            return;
-
-        if (lives <= 0)
+        System.TimeSpan timeLeft = nextLifeTime - System.DateTime.Now;
+        if (timeLeft.TotalSeconds > 0)
         {
-            System.TimeSpan timeLeft = nextLifeTime - System.DateTime.Now;
-            if (timeLeft.TotalSeconds > 0)
-            {
-                timerText.text = "Next life in: " +
-                    timeLeft.Minutes.ToString("00") + ":" +
-                    timeLeft.Seconds.ToString("00");
-            }
-            else
-            {
-                lives = maxLives;
-                PlayerPrefs.SetInt("Lives", lives);
-                PlayerPrefs.SetString("NextLifeTime", "");
-                PlayerPrefs.Save();
-                timerText.text = "";
-            }
+            timerText.text = "Next life in: " +
+                timeLeft.Minutes.ToString("00") + ":" +
+                timeLeft.Seconds.ToString("00");
         }
         else
         {
+            lives = maxLives;
+            PlayerPrefs.SetInt("Lives", lives);
+            PlayerPrefs.SetString("NextLifeTime", "");
+            PlayerPrefs.Save();
+
+            // ✅ Update hearts immediately after refill
+            for (int i = 0; i < hearts.Length; i++)
+                hearts[i].enabled = i < lives;
+
             timerText.text = "";
         }
     }
+    else
+    {
+        timerText.text = "";
+    }
+}
 
     // ---------------- DAILY REWARD ----------------
     private void LoadDailyRewardTimer()
