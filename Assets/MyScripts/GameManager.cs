@@ -18,16 +18,17 @@ public class GameManager : MonoBehaviour
     public int coinValue = 1;
     private int totalCoins = 0;
 
-    // === Life System ===
     private int lives = 3;
     private System.DateTime nextLifeTime;
     private const int maxLives = 3;
     private const int refillTimeMinutes = 1;
 
 
-    public int coinsPerMinute = 1;         // how many coins to give per real minute
-    public TextMeshProUGUI coinText;        // optional: assign in Inspector to show total coins
-
+    public int coinsPerMinute = 1;        
+    public TextMeshProUGUI coinText;
+    public AudioSource gameOverSound;
+    public AudioSource backgroundMusic;
+      
 
     void Start()
     {
@@ -65,26 +66,33 @@ public class GameManager : MonoBehaviour
     }
 
     public void GameOver()
+{
+    if (!isGameOver)
     {
-        if (!isGameOver)
-        {
-            isGameOver = true;
+        isGameOver = true;
             Debug.Log("GAME OVER!");
 
-            if (gameOverPanel != null)
-                gameOverPanel.SetActive(true);
+          if (backgroundMusic != null)
+            backgroundMusic.Stop();
 
-            Time.timeScale = 0f;
-            UpdateTotalCoins();
+        if (gameOverSound != null)
+            gameOverSound.Play(); // 🔊 Play the Game Over sound
+            
 
-            if (finalScoreText != null)
-                finalScoreText.text = "Final Score: " + score;
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
 
-            if (finalHighScoreText != null)
-                finalHighScoreText.text = "High Score: " + highScore;
-        }
+        Time.timeScale = 0f;
+        UpdateTotalCoins();
+
+        if (finalScoreText != null)
+            finalScoreText.text = "Final Score: " + score;
+
+        if (finalHighScoreText != null)
+            finalHighScoreText.text = "High Score: " + highScore;
     }
-    
+}
+
 
     public void RestartGame()
     {

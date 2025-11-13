@@ -10,15 +10,15 @@ public class MainMenuUI : MonoBehaviour
     public UnityEngine.UI.Image[] hearts;
     public TextMeshProUGUI timerText; // Life refill timer
     public TextMeshProUGUI dailyRewardTimerText; // Daily reward cooldown timer
-    public TextMeshProUGUI hourlyRewardTimerText; // ✅ New: Hourly reward timer
+    public TextMeshProUGUI hourlyRewardTimerText; // Hourly reward timer
 
     [Header("Buttons & Rewards")]
     public UnityEngine.UI.Button rewardButton; // Daily reward
-    public UnityEngine.UI.Button hourlyRewardButton; // ✅ New: Hourly reward button
+    public UnityEngine.UI.Button hourlyRewardButton; // Hourly reward button
     public int dailyRewardCoins = 200;
     public float dailyRewardCooldownHours = 24f;
-    public int hourlyRewardCoins = 100; // ✅ New: +100 coins per hour
-    public float hourlyRewardCooldownHours = 1f; // ✅ 1-hour cooldown
+    public int hourlyRewardCoins = 100;
+    public float hourlyRewardCooldownHours = 1f;
 
     [Header("Game Settings")]
     public int entryFee = 200;
@@ -28,7 +28,7 @@ public class MainMenuUI : MonoBehaviour
     private int lives;
     private System.DateTime nextLifeTime;
     private System.DateTime nextRewardTime;
-    private System.DateTime nextHourlyRewardTime; // ✅ New
+    private System.DateTime nextHourlyRewardTime;
 
     void Start()
     {
@@ -36,7 +36,7 @@ public class MainMenuUI : MonoBehaviour
         UpdateHeartsUI();
         UpdateCoinDisplay();
         LoadDailyRewardTimer();
-        LoadHourlyRewardTimer(); // ✅ New
+        LoadHourlyRewardTimer();
     }
 
     void Update()
@@ -45,10 +45,10 @@ public class MainMenuUI : MonoBehaviour
             UpdateHeartsUI();
 
         UpdateDailyRewardTimerUI();
-        UpdateHourlyRewardTimerUI(); // ✅ Keep updating hourly timer
+        UpdateHourlyRewardTimerUI();
     }
 
-    // ✅ PLAY BUTTON
+    // ---------------- PLAY BUTTON ----------------
     public void OnPlayButton()
     {
         totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -74,7 +74,7 @@ public class MainMenuUI : MonoBehaviour
         }
     }
 
-    // ✅ Coin Display
+    // ---------------- COINS ----------------
     private void UpdateCoinDisplay()
     {
         int totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -82,7 +82,6 @@ public class MainMenuUI : MonoBehaviour
             coinText.text = totalCoins.ToString();
     }
 
-    // ✅ Cheat Button
     public void OnCheatAddCoins()
     {
         int totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
@@ -94,7 +93,7 @@ public class MainMenuUI : MonoBehaviour
         messageText.text = "+100 coins added!";
     }
 
-    // ✅ Load & Save Lives
+    // ---------------- LIVES ----------------
     private void LoadLives()
     {
         lives = PlayerPrefs.GetInt("Lives", maxLives);
@@ -111,7 +110,6 @@ public class MainMenuUI : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // ✅ Heart UI + Timer
     private void UpdateHeartsUI()
     {
         if (hearts == null || hearts.Length == 0)
@@ -147,7 +145,7 @@ public class MainMenuUI : MonoBehaviour
         }
     }
 
-    // ✅ DAILY REWARD SYSTEM
+    // ---------------- DAILY REWARD ----------------
     private void LoadDailyRewardTimer()
     {
         string nextRewardString = PlayerPrefs.GetString("NextRewardTime", "");
@@ -214,7 +212,7 @@ public class MainMenuUI : MonoBehaviour
         rewardButton.interactable = false;
     }
 
-    // ✅ HOURLY REWARD SYSTEM
+    // ---------------- HOURLY REWARD ----------------
     private void LoadHourlyRewardTimer()
     {
         string nextHourlyRewardString = PlayerPrefs.GetString("NextHourlyRewardTime", "");
